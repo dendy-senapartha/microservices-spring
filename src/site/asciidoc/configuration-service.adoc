@@ -1,0 +1,167 @@
+= Configuration Service
+Doc Kustian <kustian@mitrais.com>
+:icons: font
+:bl: pass:[ +]
+
+The main function of the service is to centralized configuration for other services. It will provides
+configuration needed by other services upon starting up the service.
+
+image::https://www.plantuml.com/plantuml/svg/SoWkIImgAStDuUAATixFIyjCBorABCdCprC8JYqgoqnEZLL8B5P81ijmHGUbfcSMbnHLeaWMGGMveWEAybDAaqjGP0iWObpH_YKPgKKeKlaW4IukYE4Akhe6chgw2DDGXM76e8f2J718pKi1-W00[Embedded,600,opts=inline]
+
+The service utilised http://http://cloud.spring.io/spring-cloud-static/spring-cloud-config/2.0.2.RELEASE/single/spring-cloud-config.html[Spring Cloud Config]
+server and uses file-system as backend. In production, you may consider other alternatives such as
+Git, SVN, Vault or JDBC as backend.
+
+== Configuration
+The configuration file for this service is using YAML file.
+
+.src/main/resources/application.yml
+[source, yaml]
+----
+spring:
+  application:
+    name: configuration
+  profiles:
+    active:
+      - native # important for file system based configuration server
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations: classpath:/config # location for client's configuration files (service-name.yml)
+# EUREKA DISCOVERY
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    fetchRegistry: false # no need to resolve other services
+    serviceUrl:
+      defaultZone: http://localhost:9091/eureka # register this service with registry
+  instance:
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    leaseRenewalIntervalInSeconds: 5   # DO NOT DO THIS IN PRODUCTION
+# TOMCAT
+server:
+  port: 9090
+# ACTUATOR ENDPOINTS
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - env
+----
+{bl}
+
+One thing to note on the above configuration is the location of the configuration files for other
+services described in `spring.cloud.config.server.native.searchLocations` property. The value is
+pointing to classpath inside config directory, therefore configuration files for other services
+should be place in that directory with the file name format `service-name.[yml|properties]`.
+{bl}
+
+[source, console]
+----
+configuration-service
+├── src
+    ├── main
+        ├── resources
+            └── config
+                └── account.yml
+                └── authorization.yml
+                └── gateway.yml
+                └── order.yml
+                └── product.yml
+                └── registry.yml
+----
+
+== Testing
+To test the service, build and run the project as described in link:project-layout.html[Project Layout]
+then open the browser and access the following url format `[hostname]:[port]/[service-name]/[profile]`:
+
+* `[hostname]` is the server name or ip address e.g. localhost, 127.0.0.1
+* `[port]` is the server port e.g. 9090
+* `[service-name]` is the _configuration name_.
+* `[profile]` is the _profile name_.
+
+By default the service will run using port number 9090. Example, to load default configuration for
+_product-service_ use this url http://localhost:9090/product/default
+{bl}
+
+[source, json]
+----
+{
+   "name":"product",
+   "profiles":[
+      "default"
+   ],
+   "label":null,
+   "version":null,
+   "state":null,
+   "propertySources":[
+      {
+         "name":"classpath:/config/product.yml (document #0)",
+         "source":{
+            "token.signingKey":123,
+            "logging.level.org.springframework.security":"DEBUG",
+            "eureka.client.healthcheck.enabled":true,
+            "eureka.client.fetchRegistry":false,
+            "eureka.client.serviceUrl.defaultZone":"http://localhost:9091/eureka",
+            "eureka.instance.instanceId":"${spring.application.name}:${spring.application.instance_id:${random.value}}",
+            "eureka.instance.leaseRenewalIntervalInSeconds":5,
+            "server.port":8084,
+            "management.endpoints.web.exposure.include[0]":"health",
+            "management.endpoints.web.exposure.include[1]":"info",
+            "management.endpoints.web.exposure.include[2]":"env"
+         }
+      }
+   ]
+}
+----
+{bl}
+
+To load docker configuration for _product_service_ use this url http://localhost:9090/product/docker
+{bl}
+
+[source, json]
+----
+{
+   "name":"product",
+   "profiles":[
+      "docker"
+   ],
+   "label":null,
+   "version":null,
+   "state":null,
+   "propertySources":[
+      {
+         "name":"classpath:/config/product.yml (document #1)",
+         "source":{
+            "spring.profiles":"docker",
+            "eureka.client.registerWithEureka":true,
+            "eureka.client.fetchRegistry":true,
+            "eureka.client.serviceUrl.defaultZone":"http://node0.registry/eureka, http://node1.registry/eureka",
+            "eureka.instance.instanceId":"${spring.application.name}:${HOSTNAME}",
+            "server.port":80
+         }
+      },
+      {
+         "name":"classpath:/config/product.yml (document #0)",
+         "source":{
+            "token.signingKey":123,
+            "logging.level.org.springframework.security":"DEBUG",
+            "eureka.client.healthcheck.enabled":true,
+            "eureka.client.fetchRegistry":false,
+            "eureka.client.serviceUrl.defaultZone":"http://localhost:9091/eureka",
+            "eureka.instance.instanceId":"${spring.application.name}:${spring.application.instance_id:${random.value}}",
+            "eureka.instance.leaseRenewalIntervalInSeconds":5,
+            "server.port":8084,
+            "management.endpoints.web.exposure.include[0]":"health",
+            "management.endpoints.web.exposure.include[1]":"info",
+            "management.endpoints.web.exposure.include[2]":"env"
+         }
+      }
+   ]
+}
+----

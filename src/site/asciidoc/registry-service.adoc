@@ -1,0 +1,90 @@
+= Registry Service
+Doc Kustian <kustian@mitrais.com>
+:icons: font
+:bl: pass:[ +]
+
+The main function of the service is to provides registration of running services and auto-discover
+services needed by other services. Example, when Product Service and Order Service are starting up,
+it will register them self to this service, when Order Service need to contact Product Service, the
+Registry Service will provides the ip address or hostname of Product Service.
+
+image::https://www.plantuml.com/plantuml/svg/NOyn2eKm40NxFSMIpYBW4Rp15os3XIIB1jJ8PXMy_JT41Mrd7WElYjApRFC4O1eQV1G-i2NUlQKE-uXyGJ0r1xTPUTarCp0_TiGl5H8vXOnVaGZ07KRbVBHX9rQeTLbe_LIVoSLL1ccPwzz1JbUqkFFH7m00[Embedded,600,opts=inline]
+
+The service utilised https://cloud.spring.io/spring-cloud-netflix/1.4.x/multi/multi_spring-cloud-eureka-server.html[Spring Cloud Netflix Eureka Server].
+
+== Configuration
+The configuration for this service is provided by Configuration Service. It will load configuration
+with the application name `registry`.
+
+.src/main/resources/config/registry.yml
+[source, yaml]
+----
+# EUREKA DISCOVERY
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    registerWithEureka: false # no need to register
+    fetchRegistry: false # no need to discover other services
+    serviceUrl:
+      defaultZone: http://localhost:9091/eureka
+  instance:
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    leaseRenewalIntervalInSeconds: 5   # DO NOT DO THIS IN PRODUCTION
+# TOMCAT
+server:
+  port: 9091
+# ACTUATOR ENDPOINTS
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - env
+----
+{bl}
+
+One thing to note here is that we need to tell the service to load configuration from Configuration Service
+by providing bootstrap file.
+{bl}
+
+.src/main/resources/bootstrap.yml
+[source, yaml]
+----
+spring:
+  application:
+    name: registry
+  cloud:
+    config:
+      uri:
+        - http://localhost:9090
+      fail-fast: true
+      retry:
+        initialInterval: 5000
+        maxInterval: 5000
+        maxAttempts: 10
+----
+{bl}
+
+The service also uses https://github.com/spring-projects/spring-retry[Spring Retry] to make sure that
+when the Configuration Service is not available yet, it will retry to load the configuration several
+times based on the given configuration.
+
+== Testing
+To test the service, build and run the project as described in link:project-layout.html[Project Layout]
+then open the browser and access the following url format `[hostname]:[port]/[service-name]/[profile]`:
+
+* `[hostname]` is the server name or ip address e.g. localhost, 127.0.0.1
+* `[port]` is the server port e.g. 9091
+* `[service-name]` is the _configuration name_.
+* `[profile]` is the _profile name_.
+
+By default the service will run using port number 9091. To access the Eureka dashboard go to the
+following url http://localhost:9091/. All services registered on this Registry Services will be displayed.
+
+{bl}
+{bl}
+
+image::images/eureka-dashboard.png[Embedded,600,opts=inline]

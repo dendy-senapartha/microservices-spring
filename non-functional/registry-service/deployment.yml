@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-registry
+  labels:
+    app: service-registry
+spec:
+  externalTrafficPolicy: Local
+  type: NodePort
+  ports:
+  - nodePort: 30000
+    targetPort: 80
+    port: 80
+    name: service-registry
+  selector:
+    app: service-registry
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: service-registry
+spec:
+  serviceName: service-registry
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-registry
+  template:
+    metadata:
+      labels:
+        app: service-registry
+    spec:
+      containers:
+      - name: service-registry
+        image: mitraisosc/com.mitrais.microservices-registry-service:0.0.0-SNAPSHOT
+        ports:
+        - containerPort: 80
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+          # Due to camelcase issues with "defaultZone" and "preferIpAddress", _JAVA_OPTIONS is used here
+        - name: _JAVA_OPTIONS
+          value: -Deureka.instance.preferIpAddress=false
+        - name: EUREKA_URI
+          value: http://service-registry-0.service-registry/eureka/,http://service-registry-1.service-registry/eureka/
+        - name: EUREKA_SELF_REGISTER
+          value: "true"
+        - name: EUREKA_CLIENT_FETCH_REGISTRY
+          value: "true"
+        # The hostnames must match with the the eureka serviceUrls, otherwise the replicas are reported as unavailable in the eureka dashboard
+        - name: EUREKA_HOSTNAME
+          value: ${MY_POD_NAME}.service-registry
+        - name: CONFIG_SERVER_URI
+          value: http://service-config
+        - name: PORT
+          value: "80"
+      # No need to start the pods in order. We just need the stable network identity
+  podManagementPolicy: "Parallel"

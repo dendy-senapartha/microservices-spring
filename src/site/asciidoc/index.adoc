@@ -1,0 +1,39 @@
+= Overview
+Doc Kustian <kustian@mitrais.com>
+:icons: font
+:bl: pass:[ +]
+
+The project contains multiple services divided into two categories:
+
+* Non-Functional Services
+* Functional Services
+
+Note that there are no standard on how to categorized the services.
+
+image::https://www.plantuml.com/plantuml/svg/RPB1JiGW48RlFCMa9pqqyH7McEXDZJu1eGDBP9bcEjYindUNqgsxi7BZumF-6TXDebdI8QZfmyTHipv0y17bE28GovvKG2iW1EpTNc3mZ4OyHQKiXG4PkcUA_MEAXUhGWPuWsZo7RmLvvFEzrKQWUw1elKki5nFUaJ-zmUARijBeR-Zy97oiJ3x1ndtIWhEkLJUhdtFA9k6_0UzJBfZzrtL0dLTQsHXAKMfjPOtvoZGaKvlZoXhpXPUibnujPAbZRH7qvHbkxcxxKe9oynNQMWJzcMsx2_dhOKLpkvgTcQXo_sc-PRvaMyKxZ4F-Hhy0[Embedded,600,opts=inline]
+{bl}
+
+== Non-Functional Services
+
+Provides functionality to maintain the system operation. These services are:
+
+* Configuration Service
+* Registry Service
+* Gateway Service
+
+== Functional Services
+
+Provides functionality related with business function of the system.
+
+* Authorization Service
+* Account Service
+* Product Service
+* Order Service
+
+Simple use case describe with the following sequence diagram :
+
+image::https://www.plantuml.com/plantuml/svg/LP113i8W44Ntd6BYthXtOVG4cXWFGAPJ9MqPCWmkFBr3Qsf9MC1_y-65SrOlMgRHULGMU6GIXnnLU8JTfUYB9Noy1evm9ta7f1tuREi_TPMEfA6yeJVXhg0sF6tu1P5BRBb7vwe9x4_rU8IHdo4ws-ujgUG8oWF5TOhhL1ez4d3LSHPOd6gCBy81qiyZYRtYqdBLKcl8KlIu5b6e2mf-cggd_TE_cKlV1mna-WU8h7FvPsXuDe4GUtPdYftzyXS0[Embedded,600,opts=inline]
+{bl}
+
+NOTE: Before diving deep into each services, it's better to understand how the project
+is structured by looking at link:project-layout.html[Project Layout] section.

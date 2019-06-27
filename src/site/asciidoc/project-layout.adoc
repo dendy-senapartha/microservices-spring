@@ -1,0 +1,166 @@
+= Project Layout
+Doc Kustian <kustian@mitrais.com>
+:icons: font
+:bl: pass:[ +]
+
+https://maven.apache.org[Apache Maven] is used to manage the project. Because the project contains
+multiple services, its wise to used Maven
+https://maven.apache.org/guides/mini/guide-multiple-modules.html[multi-modules] feature to logically
+separate services from each others. Thus, will create an explicit boundaries between the
+modules (services) to avoid using component which belongs to other services. Its a good practice to
+implement https://en.wikipedia.org/wiki/Encapsulation_(computer_programming)[encapsulation] as early
+as possible forcing https://en.wikipedia.org/wiki/Separation_of_concerns[Separation of Concerns (SOC)]
+principle in project layout.
+
+{bl}
+
+[source, console]
+----
+microservice-project <1>
+├── functional <2>
+│   ├── account-service <3>
+│   │   ├── pom.xml
+│   │   └── src
+│   ├── authorization-service
+│   │   ├── pom.xml
+│   │   └── src
+│   ├── order-service
+│   │   ├── pom.xml
+│   │   └── src
+│   ├── pom.xml
+│   └── product-service
+│       ├── pom.xml
+│       └── src
+├── non-functional
+│   ├── configuration-service
+│   │   ├── pom.xml
+│   │   └── src
+│   ├── gateway-service
+│   │   ├── pom.xml
+│   │   └── src
+│   ├── pom.xml
+│   └── registry-service
+│       ├── pom.xml
+│       └── src
+├── pom.xml
+----
+<1> Parent project
+<2> Sub parent project e.g. (functional, non-functional)
+<3> Service project e.g. (account-service, gateway-service)
+
+{bl}
+
+== Dependencies
+Maven support dependency inheritance, therefore any dependency defined in parent project will be
+applied across modules.
+
+=== Parent Pom (Microservice Project)
+Acts as a project aggregator and provides common dependencies across all modules.
+
+.microservice-project/pom.xml
+[source, xml]
+----
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.0.RELEASE</version>
+    <relativePath/> <!-- lookup parent from repository -->
+</parent>
+<properties>
+    <spring-cloud.version>Greenwich.M3</spring-cloud.version>
+</properties>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring-cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+<dependencies>
+    <!--
+    Never write another getter or equals method again https://projectlombok.org/
+    -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+    </dependency>
+    <!--
+    Register and discover other services from Service Discovery
+    -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    </dependency>
+    <!--
+    Provides application metrics information
+    -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+</dependencies>
+----
+
+=== Sub Parent Pom
+Acts similarly with the parent pom with some specific dependencies for different context.
+
+==== Functional Parent Pom
+All functional services will have its own database and uses JPA technology to provides data operation.
+They will also provides a RESTful web services using spring-data-rest technology.
+
+.microservice-project/funtional/pom.xml
+[source, xml]
+----
+<dependencies>
+    <dependency>
+        <!-- Setup Spring Data REST Repository support -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-rest</artifactId>
+    </dependency>
+    <dependency>
+        <!-- Setup Spring Data JPA Repository support -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <!-- Setup QueryDSL support -->
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <!-- In-memory database for testing/demos -->
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+    </dependency>
+</dependencies>
+----
+
+==== Non-Functional Parent Pom
+All non-functional service doesn't provide features related directly with the business process.
+Therefore no specific dependencies defined in the pom file.
+
+== Building and Running
+To build the project, simply execute the following command `mvn clean install`. The command will
+compile, run unit-tests if any, and create jar files for each services.
+
+To run the service, go to each target directory of the service and execute the created jar file
+`java -jar [service-name]-[version].jar` e.g. `java -jar configuration-service-0.0.0-SNAPSHOT.jar`
+
+=== Docker Images
+To build the project as docker images, simply add `docker` profile as an extra parameter.
+
+[source, console]
+----
+mvn clean install -P docker
+----
+
+The command above will create docker images with the following image name format
+`mitraisosc/microservice/[ARTIFACT_ID]:[VERSION]`. Example for `configuration-service`, the created
+docker image name is `mitraisosc/microservice/configuration-service:0.0.0-SNAPSHOT`.
+Deployment as docker containerr is documented in link:docker-deployment.html[Docker Deployment]
+
+NOTE: Let's start to look at each services starting with link:configuration-service.html[Configuration Service]

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Microservices"
+		 xmlns="http://maven.apache.org/DECORATION/1.8.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd">
+
+	<skin>
+		<groupId>com.github.ktarou</groupId>
+		<artifactId>maven-bulma-skin</artifactId>
+		<version>0.0.1</version>
+	</skin>
+	<bannerLeft>
+		<name>Microservices</name>
+		<href>https://mitrais.github.io/microservice</href>
+	</bannerLeft>
+	<body>
+		<head>
+			<![CDATA[
+				<link rel="icon" href="./images/mitrais-logo.png">
+				<link rel="stylesheet" href="./libs/highlightjs/github.css">
+				<link rel="stylesheet" href="./css/mitrais.css">
+				<script src="./libs/highlightjs/highlight.pack.js"></script>
+				<script>hljs.initHighlightingOnLoad();</script>
+			]]>
+		</head>
+		<menu name="Documentation" inherit="bottom">
+			<item name="Overview" href="index.html" />
+			<item name="Project Layout" href="project-layout.html" />
+			<item name="Non-Functional" href="#">
+				<item name="Configuration Service" href="configuration-service.html" />
+				<item name="Registry Service" href="registry-service.html" />
+				<item name="Gateway Service" href="gateway-service.html" />
+			</item>
+			<item name="Functional" href="#">
+				<item name="Product Service" href="product-service.html" />
+				<item name="Account Service" href="account-service.html" />
+			</item>
+			<item name="Tests" href="./tests.html" />
+		</menu>
+		<menu name="Info and reports" inherit="bottom">
+			<item name="Info" href="./project-info.html" />
+			<item name="Reports" href="./project-reports.html" />
+			<item name="JavaDocs" href="./apidocs/" />
+		</menu>
+		<menu name="Github" inherit="bottom">
+			<item name="SCM" href="https://github.com/Mitrais/microservices">
+				<description>GitHub</description>
+			</item>
+			<item name="Issues" href="https://github.com/Mitrais/microservices/issues">
+				<description>GitHub</description>
+			</item>
+		</menu>
+		<menu name="Mitrais" inherit="bottom">
+			<item name="Website" href="https://www.mitrais.com" />
+			<item name="Github" href="https://github.com/Mitrais" />
+		</menu>
+		<menu name="Icons" inherit="bottom">
+			<item name="Github" img="github" href="https://github.com/Mitrais/microservices" />
+		</menu>
+		<menu name="Overview" inherit="bottom">
+			<item name="Overview" href="./overview.html" />
+		</menu>
+	</body>
+</project>
