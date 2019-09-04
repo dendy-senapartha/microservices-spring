@@ -3,8 +3,8 @@ eureka:
   client:
     healthcheck:
       enabled: true
-    registerWithEureka: false # no need to register
-    fetchRegistry: false # no need to discover other services
+    registerWithEureka: true
+    fetchRegistry: true
     serviceUrl:
       defaultZone: http://localhost:9091/eureka
   instance:

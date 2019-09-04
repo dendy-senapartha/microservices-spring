@@ -15,6 +15,7 @@ eureka:
     healthcheck:
       enabled: true
     fetchRegistry: false # no need to resolve other services
+    register-with-eureka: false
     serviceUrl:
       defaultZone: http://localhost:9091/eureka # register this service with registry
   instance:

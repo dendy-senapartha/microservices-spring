@@ -28,14 +28,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	private UserRepository userRepository;
 
 	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(username -> {
-			Optional<User> user = userRepository.findById(username);
-			return user.orElse(null);
-		});
-	}
-
-	@Override
 	@Bean
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		return super.authenticationManagerBean();

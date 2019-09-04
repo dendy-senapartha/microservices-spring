@@ -13,32 +13,32 @@ spring:
         predicates:
         - Path=/accounts/**
         filters:
-        - PreserveHostHeader
+        - RewritePath=/accounts/(?<remains>.*), /$\{remains}
       - id: product
         uri: lb://product
         predicates:
         - Path=/products/**
         filters:
-        - PreserveHostHeader
+        - RewritePath=/products/(?<remains>.*), /$\{remains}
       - id: order
         uri: lb://order
         predicates:
         - Path=/orders/**
         filters:
-        - PreserveHostHeader
+        - RewritePath=/orders/(?<remains>.*), /$\{remains}
       - id: authorization
         uri: lb://authorization
         predicates:
         - Path=/auth/**
         filters:
-        - PreserveHostHeader
+        - RewritePath=/auth/(?<remains>.*), /$\{remains}
 # EUREKA DISCOVERY
 eureka:
   client:
     healthcheck:
       enabled: true
-    registerWithEureka: false
-    fetchRegistry: false
+    registerWithEureka: true
+    fetchRegistry: true
     serviceUrl:
       defaultZone: http://localhost:9091/eureka
   instance:
